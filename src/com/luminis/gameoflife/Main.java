@@ -1,16 +1,8 @@
-package com.luminis;
+package com.luminis.gameoflife;
 
 public class Main {
-
-    class Speelveld {
-        int breedte, hoogte;
-        int[][] cel;
-        Speelveld() {
-            breedte = 80;
-            hoogte = 50;
-        }
-    }
-    public static void main(String[] args) {
-	// write your code here
-    }
+	public static void main(String[] args) {
+        Field current_field = new Field();
+        current_field.show();
+	}
 }
