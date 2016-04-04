@@ -6,6 +6,7 @@ import java.util.Arrays;
 /**
  * Created by paul on 04/04/16.
  */
+
 public class Field {
 	private int width, height;
 	private boolean[][] cells;
@@ -28,7 +29,7 @@ public class Field {
 
 	private int wrapCoordinate(int coordinate, int upperBound) { // implicit lower bound 0
 		coordinate = coordinate % upperBound;
-		return coordinate < 0 ? coordinate + upperBound : coordinate; // this step because of negative remainder in case of negative coordinate
+		return coordinate < 0 ? coordinate + upperBound : coordinate; // this step needed because of negative remainder in case of negative coordinate
 	}
 
 	boolean get_cell( int cell_x, int cell_y ) {
@@ -37,7 +38,7 @@ public class Field {
 	}
 
 	void set_cell( int cell_x, int cell_y, boolean value ) {
-		// wrap coordinates, i.e. playing field is a torus.
+		// wrap coordinates, i.e. cells live on a torus.
 		cells[wrapCoordinate(cell_x, height)][wrapCoordinate(cell_y, width)] = value;
 	}
 
@@ -45,7 +46,7 @@ public class Field {
 		int total = 0;
 		for(int i = -1; i <= 1 ; i++) {
 			for(int j = -1; j <= 1; j++) {
-				if ( ( i != 0 || j != 0 ) && get_cell(cell_x+i, cell_y+j) ) total++; // count only neighbours
+				if ( ( i != 0 || j != 0 ) && get_cell(cell_x+i, cell_y+j) ) total++; // count only neighbours, not the cell itself
 			}
 		}
 		return total;
