@@ -13,9 +13,6 @@ public class Main {
 		current_field.set_cell(3,3,true);
 		current_field.set_cell(3,4,true);
 
-//		current_field.set_cell(9,15,true); // these 2 lines should be a test
-//		System.out.println(current_field.get_cell(-1,-1));
-
 		InputStreamReader input = new InputStreamReader(System.in);
 		BufferedReader keyboard = new BufferedReader(input);
 		String line = "";
