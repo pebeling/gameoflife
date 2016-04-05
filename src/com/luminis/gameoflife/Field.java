@@ -5,15 +5,13 @@ public class Field {
 	private boolean[][] cells;
 
 	Field() {
-		width = 16;
-		height = 10;
-		cells = new boolean[height][width]; // when using boolean[], the array is initialized with "false"; NB index order as for matrices
+		this(10,16);
 	}
 
 	Field(int height, int width) {
 		this.width = Math.max(0, width);
 		this.height = Math.max(0, height);
-		cells = new boolean[this.height][this.width];
+		cells = new boolean[this.height][this.width]; // when using boolean[], the array is initialized with "false"; NB index order as for matrices
 	}
 
 	Field(String[] lines) {
