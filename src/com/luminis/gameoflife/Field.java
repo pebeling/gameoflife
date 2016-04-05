@@ -59,10 +59,10 @@ public class Field {
 	// Fills a field using an array of strings such as { ".O.","..O","OOO" }, where O correspond to live cells. All other characters will be interpreted as dead cells
 	// We silently clip strings longer than width and drop strings with index >= height. We pad the field with dead cells
 	// cellX, cellY for offset
-	void setField(int horizontalOffset, int verticalOffset, String[] lines ) {
+	void setField(int verticalOffset, int horizontalOffset, String[] lines ) {
 		for(int i = 0; i < height; i++) {
-			if (i < lines.length) for (int j = 0; j < width; j++) setCell(i + horizontalOffset, j + verticalOffset, j < lines[i].length() && lines[i].charAt(j) == 'O');
-			else for (int j = 0; j < width; j++) setCell(i + horizontalOffset, j + verticalOffset, false);
+			if (i < lines.length) for (int j = 0; j < width; j++) setCell(i + verticalOffset, j + horizontalOffset, j < lines[i].length() && lines[i].charAt(j) == 'O');
+			else for (int j = 0; j < width; j++) setCell(i + verticalOffset, j + horizontalOffset, false);
 		}
 	}
 
