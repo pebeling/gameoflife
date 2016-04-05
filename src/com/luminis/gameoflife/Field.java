@@ -3,10 +3,6 @@ package com.luminis.gameoflife;
 import java.security.cert.X509Certificate;
 import java.util.Arrays;
 
-/**
- * Created by paul on 04/04/16.
- */
-
 public class Field {
 	private int width, height;
 	private boolean[][] cells;
@@ -32,21 +28,38 @@ public class Field {
 		return coordinate < 0 ? coordinate + upperBound : coordinate; // this step needed because of negative remainder in case of negative coordinate
 	}
 
-	boolean get_cell( int cell_x, int cell_y ) {
+	boolean getCell( int cellX, int cellY ) {
 		// wrap coordinates, i.e. playing field is a torus
-		return cells[wrapCoordinate(cell_x, height)][wrapCoordinate(cell_y, width)];
+		return cells[wrapCoordinate(cellX, height)][wrapCoordinate(cellY, width)];
 	}
 
-	void set_cell( int cell_x, int cell_y, boolean value ) {
+	void setCell( int cellX, int cellY, boolean value ) {
 		// wrap coordinates, i.e. cells live on a torus.
-		cells[wrapCoordinate(cell_x, height)][wrapCoordinate(cell_y, width)] = value;
+		cells[wrapCoordinate(cellX, height)][wrapCoordinate(cellY, width)] = value;
 	}
 
-	private int numberOfNeighbours( int cell_x, int cell_y ) {
+	// Fills a field using an array of strings such as { ".O.","..O","OOO" }, where O correspond to live cells. All other characters will be interpreted as dead cells
+	// We silently clip strings longer than width and drop strings with index >= height. We pad the field with dead cells
+	// cellX, cellY for offset
+	void setField(int offsetX, int offsetY,  String[] lines ) {
+		for(int i = 0; i < height; i++) {
+			if (i < lines.length) for (int j = 0; j < width; j++) setCell(i + offsetX, j + offsetY, j < lines[i].length() && lines[i].charAt(j) == 'O');
+			else for (int j = 0; j < width; j++) setCell(i + offsetX, j + offsetY, false);
+		}
+	}
+
+	boolean equals(Field field) {
+		boolean result = field.width == this.width && field.height == this.height;
+		for(int i = 0; i < height && result ; i++)
+			for (int j = 0; j < width && result; j++) result = this.cells[i][j] == field.cells[i][j];
+		return result;
+	}
+
+	private int numberOfNeighbours( int cellX, int cellY ) {
 		int total = 0;
 		for(int i = -1; i <= 1 ; i++) {
 			for(int j = -1; j <= 1; j++) {
-				if ( ( i != 0 || j != 0 ) && get_cell(cell_x+i, cell_y+j) ) total++; // count only neighbours, not the cell itself
+				if ( ( i != 0 || j != 0 ) && getCell(cellX + i, cellY + j) ) total++; // count only neighbours, not the cell itself
 			}
 		}
 		return total;
@@ -66,7 +79,7 @@ public class Field {
 					if ( numberOfNeighbours == 3 ) newStatus = true; // birth
 					else newStatus = false; // stays dead
 				}
-				evolvedField.set_cell(i, j, newStatus);
+				evolvedField.setCell(i, j, newStatus);
 			}
 		}
 		this.cells = evolvedField.cells;
