@@ -22,38 +22,39 @@ public class FieldTest {
 	@Test
 	public void gliderPeriodTest() {
 		// After four generations the glider regained its original shape and has moved down and to the right by one step
-		Field playingField1 = new Field();
-		Field playingField2 = new Field();
+		Field playingFieldFirstGen = new Field();
+		Field playingFieldFourthGen = new Field();
 
-		String[] glider = {
+		playingFieldFirstGen.setField(0, 0, new String[]{
 				".O.",
 				"..O",
 				"OOO"
-		};
-		playingField1.setField(0,0,glider);
-		playingField2.setField(1,1,glider);
-		for (int i = 0; i < 4; i++) playingField1.evolve();
-		assertEquals(playingField1.equals(playingField2), true);
+		});
+		playingFieldFourthGen.setField(1, 1, new String[]{
+				".O.",
+				"..O",
+				"OOO"
+		});
+		for (int i = 0; i < 4; i++) playingFieldFirstGen.evolve();
+		assertEquals(playingFieldFirstGen.equals(playingFieldFourthGen), true);
 	}
 
 	@Test
 	public void gliderOneStepTest() {
-		Field playingField1 = new Field();
-		Field playingField2 = new Field();
+		Field playingFieldFirstGen = new Field();
+		Field playingFieldNextGen = new Field();
 
-		String[] glider = {
+		playingFieldFirstGen.setField(0, 0, new String[]{
 				".O.",
 				"..O",
 				"OOO"
-		};
-		String[] gliderNextGen = {
+		});
+		playingFieldFirstGen.setField(1, 0, new String[]{
 				"O.O",
 				".OO",
 				".O."
-		};
-		playingField1.setField(0,0,glider);
-		playingField2.setField(1,0,gliderNextGen);
-		playingField1.evolve();
-		assertEquals(playingField1.equals(playingField2), true);
+		});
+		playingFieldFirstGen.evolve();
+		assertEquals(playingFieldFirstGen.equals(playingFieldNextGen), true);
 	}
 }

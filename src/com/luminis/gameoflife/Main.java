@@ -7,12 +7,11 @@ public class Main {
 	public static void main(String[] args) throws java.io.IOException {
 		Field current_field = new Field();
 
-		String[] glider = {
+		current_field.setField(1, 1, new String[]{
 				".O.",
 				"..O",
 				"OOO"
-		};
-		current_field.setField(1,1,glider);
+		});
 
 		InputStreamReader input = new InputStreamReader(System.in);
 		BufferedReader keyboard = new BufferedReader(input);
@@ -20,6 +19,7 @@ public class Main {
 		while ( line.equals("") ) {
 			current_field.show();
 			current_field.evolve();
+			System.out.println("Press enter for next generation. Any other key exits.");
 			line = keyboard.readLine();
 		}
 	}

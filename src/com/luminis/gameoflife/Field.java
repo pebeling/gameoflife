@@ -1,8 +1,5 @@
 package com.luminis.gameoflife;
 
-import java.security.cert.X509Certificate;
-import java.util.Arrays;
-
 public class Field {
 	private int width, height;
 	private boolean[][] cells;
