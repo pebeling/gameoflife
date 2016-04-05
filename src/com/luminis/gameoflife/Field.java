@@ -16,7 +16,9 @@ public class Field {
 
 	Field(String[] lines) {
 		int maxStringWidth = 0;
-		for(String s: lines) maxStringWidth = Math.max(maxStringWidth, s.length());
+		for(String s: lines) {
+			maxStringWidth = Math.max(maxStringWidth, s.length());
+		}
 		width = maxStringWidth;
 		height = lines.length;
 		cells = new boolean[height][width];
@@ -59,21 +61,33 @@ public class Field {
 	// cellX, cellY for offset
 	void setField(int verticalOffset, int horizontalOffset, String[] lines ) {
 		for(int i = 0; i < height; i++) {
-			if (i < lines.length) for (int j = 0; j < width; j++) setCell(i + verticalOffset, j + horizontalOffset, j < lines[i].length() && lines[i].charAt(j) == 'O');
-			else for (int j = 0; j < width; j++) setCell(i + verticalOffset, j + horizontalOffset, false);
+			if (i < lines.length) {
+				for (int j = 0; j < width; j++) {
+					setCell(i + verticalOffset, j + horizontalOffset, j < lines[i].length() && lines[i].charAt(j) == 'O');
+				}
+			} else {
+				for (int j = 0; j < width; j++) {
+					setCell(i + verticalOffset, j + horizontalOffset, false);
+				}
+			}
 		}
 	}
 
 	void insertIntoField(int verticalOffset, int horizontalOffset, String[] lines ) {
 		for(int i = 0; i < lines.length; i++) {
-			for (int j = 0; j < lines[i].length(); j++) setCell(i + verticalOffset, j + horizontalOffset, lines[i].charAt(j) == 'O' || cells[i + verticalOffset][j + horizontalOffset]);
+			for (int j = 0; j < lines[i].length(); j++) {
+				setCell(i + verticalOffset, j + horizontalOffset, lines[i].charAt(j) == 'O' || cells[i + verticalOffset][j + horizontalOffset]);
+			}
 		}
 	}
 
 	boolean equals(Field field) {
 		boolean result = field.width == this.width && field.height == this.height;
-		for(int i = 0; i < height && result ; i++)
-			for (int j = 0; j < width && result; j++) result = this.cells[i][j] == field.cells[i][j];
+		for(int i = 0; i < height && result ; i++) {
+			for (int j = 0; j < width && result; j++) {
+				result = this.cells[i][j] == field.cells[i][j];
+			}
+		}
 		return result;
 	}
 
