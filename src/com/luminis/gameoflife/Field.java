@@ -7,7 +7,7 @@ public class Field {
 	Field() {
 		width = 16;
 		height = 10;
-		cells = new boolean[height][width]; // when using boolean[], the array is initialized with "false"; NB order as for matrices
+		cells = new boolean[height][width]; // when using boolean[], the array is initialized with "false"; NB index order as for matrices
 	}
 
 	Field(int height, int width) {
