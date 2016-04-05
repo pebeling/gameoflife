@@ -113,4 +113,25 @@ public class FieldTest {
 
 		assertTrue(playingFieldFirstGen.equals(playingFieldNextGen));
 	}
+
+	@Test
+	public void insertTest(){
+		Field playingField1 = new Field(7,7);
+		Field playingField2 = new Field(7,7);
+
+		playingField1.setField(3,2, new String[]{"OOO"});
+		playingField1.insertIntoField(1,3, new String[]{
+				"O.",
+				".O",
+				".."
+		});
+
+		playingField2.setField(1, 2, new String[]{
+				".O.",
+				"..O",
+				"OOO"
+		});
+
+		assertTrue(playingField1.equals(playingField2));
+	}
 }

@@ -66,6 +66,12 @@ public class Field {
 		}
 	}
 
+	void insertIntoField(int verticalOffset, int horizontalOffset, String[] lines ) {
+		for(int i = 0; i < lines.length; i++) {
+			for (int j = 0; j < lines[i].length(); j++) setCell(i + verticalOffset, j + horizontalOffset, lines[i].charAt(j) == 'O' || cells[i + verticalOffset][j + horizontalOffset]);
+		}
+	}
+
 	boolean equals(Field field) {
 		boolean result = field.width == this.width && field.height == this.height;
 		for(int i = 0; i < height && result ; i++)
