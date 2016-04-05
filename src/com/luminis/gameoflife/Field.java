@@ -7,17 +7,38 @@ public class Field {
 	Field() {
 		width = 16;
 		height = 10;
-		cells = new boolean[height][width]; // when using boolean[], array is initialized with false; NB order as for matrices
+		cells = new boolean[height][width]; // when using boolean[], the array is initialized with "false"; NB order as for matrices
+	}
+
+	Field(int height, int width) {
+		this.width = Math.max(0, width);
+		this.height = Math.max(0, height);
+		cells = new boolean[this.height][this.width];
+	}
+
+	Field(String[] lines) {
+		int maxStringWidth = 0;
+		for(String s: lines) maxStringWidth = Math.max(maxStringWidth, s.length());
+		width = maxStringWidth;
+		height = lines.length;
+		cells = new boolean[height][width];
+		setField(0, 0, lines);
+	}
+
+	String[] stringify() {
+		String[] lines = new String[height];
+		java.util.Arrays.fill(lines, "");
+		for(int i = 0; i < height; i++) {
+			for(int j = 0; j < width; j++) {
+				lines[i] = lines[i] + (cells[i][j] ? "O" : ".");
+			}
+		}
+		return lines;
 	}
 
 	void show() {
-		for(int i = 0; i < height; i++) {
-			for(int j = 0; j < width; j++) {
-				System.out.print(cells[i][j] ? "O" : ".");
-			}
-			System.out.print("\n");
-		}
-		System.out.print("\n");
+		System.out.println(String.join("\n", stringify()));
+		System.out.println("");
 	}
 
 	private int wrapCoordinate(int coordinate, int upperBound) { // implicit lower bound 0
@@ -25,23 +46,23 @@ public class Field {
 		return coordinate < 0 ? coordinate + upperBound : coordinate; // this step needed because of negative remainder in case of negative coordinate
 	}
 
-	boolean getCell( int cellX, int cellY ) {
+	boolean getCell( int cellVerticalCoordinate, int cellHorizontalCoordinate ) {
 		// wrap coordinates, i.e. playing field is a torus
-		return cells[wrapCoordinate(cellX, height)][wrapCoordinate(cellY, width)];
+		return cells[wrapCoordinate(cellVerticalCoordinate, height)][wrapCoordinate(cellHorizontalCoordinate, width)];
 	}
 
-	void setCell( int cellX, int cellY, boolean value ) {
-		// wrap coordinates, i.e. cells live on a torus.
-		cells[wrapCoordinate(cellX, height)][wrapCoordinate(cellY, width)] = value;
+	void setCell( int cellVerticalCoordinate, int cellHorizontalCoordinate, boolean value ) {
+		// wrap coordinates, i.e. playing field is a torus
+		cells[wrapCoordinate(cellVerticalCoordinate, height)][wrapCoordinate(cellHorizontalCoordinate, width)] = value;
 	}
 
 	// Fills a field using an array of strings such as { ".O.","..O","OOO" }, where O correspond to live cells. All other characters will be interpreted as dead cells
 	// We silently clip strings longer than width and drop strings with index >= height. We pad the field with dead cells
 	// cellX, cellY for offset
-	void setField(int offsetX, int offsetY,  String[] lines ) {
+	void setField(int horizontalOffset, int verticalOffset, String[] lines ) {
 		for(int i = 0; i < height; i++) {
-			if (i < lines.length) for (int j = 0; j < width; j++) setCell(i + offsetX, j + offsetY, j < lines[i].length() && lines[i].charAt(j) == 'O');
-			else for (int j = 0; j < width; j++) setCell(i + offsetX, j + offsetY, false);
+			if (i < lines.length) for (int j = 0; j < width; j++) setCell(i + horizontalOffset, j + verticalOffset, j < lines[i].length() && lines[i].charAt(j) == 'O');
+			else for (int j = 0; j < width; j++) setCell(i + horizontalOffset, j + verticalOffset, false);
 		}
 	}
 
@@ -52,31 +73,22 @@ public class Field {
 		return result;
 	}
 
-	private int numberOfNeighbours( int cellX, int cellY ) {
+	private int numberOfNeighbours( int cellVerticalCoordinate, int cellHorizontalCoordinate ) {
 		int total = 0;
 		for(int i = -1; i <= 1 ; i++) {
 			for(int j = -1; j <= 1; j++) {
-				if ( ( i != 0 || j != 0 ) && getCell(cellX + i, cellY + j) ) total++; // count only neighbours, not the cell itself
+				if ( ( i != 0 || j != 0 ) && getCell(cellVerticalCoordinate + i, cellHorizontalCoordinate + j) ) total++; // count only neighbours, not the cell itself
 			}
 		}
 		return total;
 	}
 
 	void evolve() {
-		Field evolvedField = new Field();
+		Field evolvedField = new Field(height, width);
 		for(int i = 0; i < height; i++) {
 			for(int j = 0; j < width; j++) {
 				int numberOfNeighbours = numberOfNeighbours(i, j);
-				boolean newStatus;
-				if ( cells[i][j] ) { // case living cell
-					if ( numberOfNeighbours > 3 ) newStatus = false; // death because of overpopulation
-					else if ( numberOfNeighbours < 2 ) newStatus = false; // death because of under-population
-					else newStatus = true; // stays alive if there are 2 or 3 live neighbours
-				} else { // case dead cell
-					if ( numberOfNeighbours == 3 ) newStatus = true; // birth
-					else newStatus = false; // stays dead
-				}
-				evolvedField.setCell(i, j, newStatus);
+				evolvedField.setCell(i, j, (cells[i][j] && !(numberOfNeighbours > 3) && !(numberOfNeighbours < 2)) || (!cells[i][j] && (numberOfNeighbours == 3)));
 			}
 		}
 		this.cells = evolvedField.cells;
