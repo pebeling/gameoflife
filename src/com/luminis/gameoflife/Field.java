@@ -43,29 +43,22 @@ public class Field {
 		return String.join("\n", stringify());
 	}
 
-	void show() {
-		System.out.println(String.join("\n", stringify()));
-		System.out.println("");
-	}
-
-	private int wrapCoordinate(int coordinate, int upperBound) { // implicit lower bound 0
+	private int wrapCoordinate(int coordinate, int upperBound) {
+		// wrap coordinates between 0 and upperBound
 		coordinate = coordinate % upperBound;
 		return coordinate < 0 ? coordinate + upperBound : coordinate; // this step needed because of negative remainder in case of negative coordinate
 	}
 
 	boolean getCell( int cellVerticalCoordinate, int cellHorizontalCoordinate ) {
-		// wrap coordinates, i.e. playing field is a torus
 		return cells[wrapCoordinate(cellVerticalCoordinate, height)][wrapCoordinate(cellHorizontalCoordinate, width)];
 	}
 
 	void setCell( int cellVerticalCoordinate, int cellHorizontalCoordinate, boolean value ) {
-		// wrap coordinates, i.e. playing field is a torus
 		cells[wrapCoordinate(cellVerticalCoordinate, height)][wrapCoordinate(cellHorizontalCoordinate, width)] = value;
 	}
 
 	// Fills a field using an array of strings such as { ".O.","..O","OOO" }, where O correspond to live cells. All other characters will be interpreted as dead cells
 	// We silently clip strings longer than width and drop strings with index >= height. We pad the field with dead cells
-	// cellX, cellY for offset
 	void setField(int verticalOffset, int horizontalOffset, String[] lines ) {
 		for(int i = 0; i < height; i++) {
 			if (i < lines.length) {
