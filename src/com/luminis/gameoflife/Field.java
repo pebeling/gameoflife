@@ -3,7 +3,7 @@ package com.luminis.gameoflife;
 public class Field {
 	public static final boolean ALIVE = true;
 	public static final boolean DEAD = false;
-	private int width, height;
+	int width, height;
 	private boolean[][] cells;
 
 	Field() {
