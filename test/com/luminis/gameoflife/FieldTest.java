@@ -60,20 +60,19 @@ public class FieldTest {
 	@Test
 	public void testCoordinateWrappingLow() {
 		Field playingField = new Field(10,16);
-		playingField.setCell(9,15,true); // places live cell at the extreme right lower corner of the field
+		playingField.setCell(9,15,Field.ALIVE);
 		assertTrue(playingField.getCell(-1,-1));
 	}
 
 	@Test
 	public void testCoordinateWrappingHigh() {
 		Field playingField = new Field(10,16);
-		playingField.setCell(9,15,true); // places live cell at the extreme right lower corner of the field
+		playingField.setCell(9,15,Field.ALIVE);
 		assertTrue(playingField.getCell(19,31));
 	}
 
 	@Test
 	public void gliderFourGenerationsTest() {
-		// After four generations the glider regained its original shape and has moved down and to the right by one step
 		Field playingFieldFirstGen = new Field(10,16);
 		Field playingFieldFourthGen = new Field(10,16);
 

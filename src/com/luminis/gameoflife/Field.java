@@ -1,6 +1,8 @@
 package com.luminis.gameoflife;
 
 public class Field {
+	public static final boolean ALIVE = true;
+	public static final boolean DEAD = false;
 	private int width, height;
 	private boolean[][] cells;
 
@@ -36,6 +38,11 @@ public class Field {
 		return lines;
 	}
 
+	@Override
+	public String toString() {
+		return String.join("\n", stringify());
+	}
+
 	void show() {
 		System.out.println(String.join("\n", stringify()));
 		System.out.println("");
@@ -67,7 +74,7 @@ public class Field {
 				}
 			} else {
 				for (int j = 0; j < width; j++) {
-					setCell(i + verticalOffset, j + horizontalOffset, false);
+					setCell(i + verticalOffset, j + horizontalOffset, DEAD);
 				}
 			}
 		}

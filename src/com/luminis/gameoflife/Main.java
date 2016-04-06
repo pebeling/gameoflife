@@ -17,7 +17,7 @@ public class Main {
 		BufferedReader keyboard = new BufferedReader(input);
 		String line = "";
 		while ( line.equals("") ) {
-			current_field.show();
+			System.out.print(current_field + "\n");
 			current_field.evolve();
 			System.out.println("Press enter for next generation. Any other key + enter exits.");
 			line = keyboard.readLine();
