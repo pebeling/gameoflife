@@ -13,11 +13,8 @@ import javafx.scene.paint.*;
 import javafx.geometry.*;
 import javafx.util.Duration;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class Main extends Application {
-	private GuiField field = new GuiField(20,20);
+	private GuiField field = new GuiField(30,30);
 
 	public static void main(String[] args) {
 		launch(args);
@@ -32,14 +29,12 @@ public class Main extends Application {
 		ScrollPane sPane = new ScrollPane(field.fieldGrid);
 		sPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
 		sPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
-
-		VBox controlPanel = new VBox();
+		sPane.setPannable(true);
 
 		Button evolveButton = new Button();
 		evolveButton.setText("Evolve");
 		evolveButton.setOnAction(e -> evolveButtonClick());
 		evolveButton.setMaxWidth(Double.MAX_VALUE);
-
 
 		Button loadGliderButton = new Button();
 		loadGliderButton.setText("Add Glider");
@@ -67,24 +62,20 @@ public class Main extends Application {
 
 		Slider evolutionSpeed = new Slider(5, 500, 50);
 		evolutionSpeed.setOrientation(Orientation.HORIZONTAL);
-		evolutionSpeed.setPrefHeight(100);
+		evolutionSpeed.setPrefHeight(50);
 		evolutionSpeed.valueProperty().addListener(
 				(observable, oldValue, newValue) -> resetTimer(timer, newValue)
 		);
 
-		//Label evolutionSpeedLabel = new Label("Speed:");
+		VBox leftPanel = new VBox(sPane, evolutionSpeed);
+		VBox rightPanel = new VBox(loadGliderButton, loadSpaceshipButton, evolveButton, startEvolutionButton, stopEvolutionButton, resetFieldButton);
+		rightPanel.setMinWidth(120);
 
-		controlPanel.getChildren().addAll(loadGliderButton, loadSpaceshipButton, evolveButton, startEvolutionButton, stopEvolutionButton, resetFieldButton);
+		HBox rootPane = new HBox(leftPanel, rightPanel);
+		rootPane.setPadding(new Insets(5, 5, 5, 5));
+		rootPane.setSpacing(5);
 
-		BorderPane pane = new BorderPane();
-		pane.setLeft(sPane);
-		pane.setMargin(sPane, new Insets(5, 5, 0, 5));
-		pane.setRight(controlPanel);
-		pane.setMargin(controlPanel, new Insets(5, 5, 0, 0));
-		pane.setBottom(evolutionSpeed);
-
-
-		Scene scene = new Scene(pane);
+		Scene scene = new Scene(rootPane);
 		primaryStage.setScene(scene);
 		primaryStage.setTitle("Game Of Life");
 		primaryStage.show();
@@ -144,25 +135,11 @@ public class Main extends Application {
 	}
 }
 
-class GuiCell extends Rectangle {
-	int verticalCoordinate;
-	int horizontalCoordinate;
-
-	GuiCell(int verticalCoordinate, int horizontalCoordinate, int size) {
-		super(size, size);
-		this.verticalCoordinate = verticalCoordinate;
-		this.horizontalCoordinate = horizontalCoordinate;
-	}
-}
-
 class GuiField extends Field {
-	private List<GuiCell> guiCells;
 	GridPane fieldGrid;
 
 	GuiField(int height, int width) {
 		super(height, width);
-
-		guiCells = new ArrayList<>();
 
 		fieldGrid = new GridPane();
 		fieldGrid.setHgap(1);
@@ -170,22 +147,28 @@ class GuiField extends Field {
 
 		for (int i = 0; i < height; i++) {
 			for (int j = 0; j < width; j++) {
-				GuiCell cell = new GuiCell(i, j, 20);
+				Rectangle cell = new Rectangle(20, 20);
 				cell.setFill(Color.BLACK);
-				cell.setOnMousePressed(e -> toggleCell((GuiCell) e.getSource()));
-				guiCells.add(cell);
+				cell.setOnMousePressed(
+						e -> {
+							Rectangle source = ((Rectangle) e.getSource());
+							int verticalCoordinate = GridPane.getRowIndex(source);
+							int horizontalCoordinate = GridPane.getColumnIndex(source);
+							boolean cellState = super.getCell(verticalCoordinate, horizontalCoordinate);
+							super.setCell(verticalCoordinate, horizontalCoordinate, !cellState);
+							source.setFill( !cellState ? Color.RED : Color.BLACK);
+
+						});
 				fieldGrid.add(cell, j, i);
 			}
 		}
 	}
 
-	private void toggleCell (GuiCell cell) {
-		setCell(cell, !getCell(cell));
-	}
-
 	private void update() {
-		for(GuiCell cell : guiCells) {
-			cell.setFill(getCell(cell.verticalCoordinate, cell.horizontalCoordinate) ? Color.RED : Color.BLACK);
+		for(Node cell : fieldGrid.getChildren()) {
+			int verticalCoordinate = GridPane.getRowIndex(cell);
+			int horizontalCoordinate = GridPane.getColumnIndex(cell);
+			((Rectangle) cell).setFill(super.getCell(verticalCoordinate, horizontalCoordinate) ? Color.RED : Color.BLACK);
 		}
 	}
 
@@ -205,14 +188,5 @@ class GuiField extends Field {
 	void insertIntoField(int verticalOffset, int horizontalOffset, String[] lines) {
 		super.insertIntoField(verticalOffset, horizontalOffset, lines);
 		update();
-	}
-
-	private boolean getCell(GuiCell cell) {
-		return super.getCell(cell.verticalCoordinate, cell.horizontalCoordinate);
-	}
-
-	private void setCell(GuiCell cell, boolean value) {
-		super.setCell(cell.verticalCoordinate, cell.horizontalCoordinate, value);
-		cell.setFill(value ? Color.RED : Color.BLACK);
 	}
 }
