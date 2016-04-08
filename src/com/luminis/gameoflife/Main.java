@@ -4,6 +4,9 @@ import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.*;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.stage.*;
 import javafx.scene.*;
 import javafx.scene.layout.*;
@@ -13,6 +16,7 @@ import javafx.util.Duration;
 
 public class Main extends Application {
 	private GuiField field = new GuiField(30,30);
+	private SimpleBooleanProperty evolutionStarted = new SimpleBooleanProperty();
 
 	public static void main(String[] args) {
 		launch(args);
@@ -31,22 +35,31 @@ public class Main extends Application {
 
 		Button evolveButton = new Button();
 		evolveButton.setText("Evolve");
-		evolveButton.setOnAction(e -> evolveButtonClick());
+		evolveButton.setOnAction(e -> field.evolve());
 		evolveButton.setMaxWidth(Double.MAX_VALUE);
 
 		Button loadGliderButton = new Button();
 		loadGliderButton.setText("Add Glider");
-		loadGliderButton.setOnAction(e -> loadGliderButtonClick());
+		loadGliderButton.setOnAction(e -> field.insertIntoField(1, 1, new String[]{
+						".O.",
+						"..O",
+						"OOO"
+				}));
 		loadGliderButton.setMaxWidth(Double.MAX_VALUE);
 
 		Button loadSpaceshipButton = new Button();
 		loadSpaceshipButton.setText("Add Spaceship");
-		loadSpaceshipButton.setOnAction(e -> loadSpaceshipButtonClick());
+		loadSpaceshipButton.setOnAction(e -> field.insertIntoField(6, 3, new String[]{
+						"O..O.",
+						"....O",
+						"O...O",
+						".OOOO"
+				}));
 		loadSpaceshipButton.setMaxWidth(Double.MAX_VALUE);
 
 		Button resetFieldButton = new Button();
 		resetFieldButton.setText("Reset");
-		resetFieldButton.setOnAction(e -> resetFieldButtonClick());
+		resetFieldButton.setOnAction(e -> field.setField(0, 0, new String[]{}));
 		resetFieldButton.setMaxWidth(Double.MAX_VALUE);
 
 		Button startEvolutionButton = new Button();
@@ -56,7 +69,7 @@ public class Main extends Application {
 		Button stopEvolutionButton = new Button();
 		stopEvolutionButton.setText("Stop");
 		stopEvolutionButton.setMaxWidth(Double.MAX_VALUE);
-		//stopEvolutionButton.setDisable(true);
+		stopEvolutionButton.setDisable(true);
 
 		Slider evolutionSpeed = new Slider(5, 500, 50);
 		evolutionSpeed.setOrientation(Orientation.HORIZONTAL);
@@ -80,20 +93,15 @@ public class Main extends Application {
 		primaryStage.setMaxHeight(primaryStage.getHeight());
 		primaryStage.setMaxWidth(primaryStage.getWidth());
 
-		startEvolutionButton.setOnAction(
-				e -> {
-					evolveButton.setDisable(true);
-					startEvolutionButton.setDisable(true);
-					stopEvolutionButton.setDisable(false);
-					timer.play();
-				});
-		stopEvolutionButton.setOnAction(
-				e -> {
-					evolveButton.setDisable(false);
-					stopEvolutionButton.setDisable(true);
-					startEvolutionButton.setDisable(false);
-					timer.stop();
-				});
+		startEvolutionButton.disableProperty().bind(evolutionStarted);
+		stopEvolutionButton.disableProperty().bind(Bindings.not(evolutionStarted));
+
+		evolutionStarted.addListener((ObservableValue<? extends Boolean> value, Boolean oldValue, Boolean newValue) -> {
+			if(newValue) { timer.play(); } else { timer.stop(); }
+		});
+		evolutionStarted.set(false);
+		startEvolutionButton.setOnAction(e -> evolutionStarted.set(true));
+		stopEvolutionButton.setOnAction(e -> evolutionStarted.set(false));
 	}
 
 	private void resetTimer(Timeline timer, Number newValue) {
@@ -104,30 +112,5 @@ public class Main extends Application {
 		if (status.equals(Animation.Status.RUNNING)) {
 			timer.play();
 		}
-	}
-
-	private void resetFieldButtonClick() {
-		field.setField(0, 0, new String[]{});
-	}
-
-	private void evolveButtonClick() {
-		field.evolve();
-	}
-
-	private void loadGliderButtonClick() {
-		field.insertIntoField(1, 1, new String[]{
-				".O.",
-				"..O",
-				"OOO"
-		});
-	}
-
-	private void loadSpaceshipButtonClick() {
-		field.insertIntoField(6, 3, new String[]{
-				"O..O.",
-				"....O",
-				"O...O",
-				".OOOO"
-		});
 	}
 }
