@@ -1,5 +1,6 @@
 package com.luminis.gameoflife;
 
+import javafx.animation.Animation;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.*;
@@ -12,9 +13,11 @@ import javafx.scene.paint.*;
 import javafx.geometry.*;
 import javafx.util.Duration;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Main extends Application {
-	private Field current_field = new Field(20,20);
-	private Rectangle[][] r = new Rectangle[current_field.height][current_field.width];
+	private GuiField field = new GuiField(20,20);
 
 	public static void main(String[] args) {
 		launch(args);
@@ -22,26 +25,15 @@ public class Main extends Application {
 
 	@Override
 	public void start(Stage primaryStage) {
-		TilePane lifeTile = new TilePane();
-		lifeTile.setHgap(1);
-		lifeTile.setVgap(1);
-		lifeTile.setPrefColumns(current_field.height);
-		lifeTile.setPrefRows(current_field.width);
+		KeyFrame frame = new KeyFrame(Duration.millis(50), e -> field.evolve());
+		Timeline timer = new Timeline(frame);
+		timer.setCycleCount(Timeline.INDEFINITE);
 
-		for (int i = 0; i < current_field.height; i++) {
-			for (int j=0; j < current_field.width; j++) {
-				r[i][j] = new Rectangle(20,20);
-				r[i][j].setFill(Color.BLACK);
-
-				lifeTile.getChildren().add(r[i][j]);
-			}
-		}
-
-		ScrollPane sPane = new ScrollPane(lifeTile);
+		ScrollPane sPane = new ScrollPane(field.fieldGrid);
 		sPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
 		sPane.setVbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
 
-		VBox buttons = new VBox();
+		VBox controlPanel = new VBox();
 
 		Button evolveButton = new Button();
 		evolveButton.setText("Evolve");
@@ -72,14 +64,25 @@ public class Main extends Application {
 		stopEvolutionButton.setText("Stop");
 		stopEvolutionButton.setMaxWidth(Double.MAX_VALUE);
 		stopEvolutionButton.setDisable(true);
-		
-		buttons.getChildren().addAll(loadGliderButton, loadSpaceshipButton, evolveButton, startEvolutionButton, stopEvolutionButton, resetFieldButton);
+
+		Slider evolutionSpeed = new Slider(5, 500, 50);
+		evolutionSpeed.setOrientation(Orientation.HORIZONTAL);
+		evolutionSpeed.setPrefHeight(100);
+		evolutionSpeed.valueProperty().addListener(
+				(observable, oldValue, newValue) -> resetTimer(timer, newValue)
+		);
+
+		//Label evolutionSpeedLabel = new Label("Speed:");
+
+		controlPanel.getChildren().addAll(loadGliderButton, loadSpaceshipButton, evolveButton, startEvolutionButton, stopEvolutionButton, resetFieldButton);
 
 		BorderPane pane = new BorderPane();
 		pane.setLeft(sPane);
-		pane.setMargin(sPane, new Insets(5, 5, 5, 5));
-		pane.setRight(buttons);
-		pane.setMargin(buttons, new Insets(5, 5, 5, 0));
+		pane.setMargin(sPane, new Insets(5, 5, 0, 5));
+		pane.setRight(controlPanel);
+		pane.setMargin(controlPanel, new Insets(5, 5, 0, 0));
+		pane.setBottom(evolutionSpeed);
+
 
 		Scene scene = new Scene(pane);
 		primaryStage.setScene(scene);
@@ -88,20 +91,12 @@ public class Main extends Application {
 		primaryStage.setMaxHeight(primaryStage.getHeight());
 		primaryStage.setMaxWidth(primaryStage.getWidth());
 
-		KeyFrame k = new KeyFrame(Duration.millis(50),
-			e -> {
-				current_field.evolve();
-				updateTileColors();
-
-			} );
-		Timeline t = new Timeline(k);
-		t.setCycleCount(Timeline.INDEFINITE);
 		startEvolutionButton.setOnAction(
 				e -> {
 					evolveButton.setDisable(true);
 					startEvolutionButton.setDisable(true);
 					stopEvolutionButton.setDisable(false);
-					t.play();
+					timer.play();
 
 				});
 		stopEvolutionButton.setOnAction(
@@ -109,44 +104,115 @@ public class Main extends Application {
 					evolveButton.setDisable(false);
 					stopEvolutionButton.setDisable(true);
 					startEvolutionButton.setDisable(false);
-					t.stop();
+					timer.stop();
 				});
 	}
 
-	private void resetFieldButtonClick() {
-		current_field.setField(0, 0, new String[]{});
-		updateTileColors();
-	}
-
-	private void updateTileColors() {
-		for (int i = 0; i < current_field.height; i++) {
-			for (int j=0; j < current_field.width; j++) {
-				r[i][j].setFill(current_field.getCell(i,j) ? Color.RED : Color.BLACK);
-			}
+	private void resetTimer(Timeline timer, Number newValue) {
+		KeyFrame k = new KeyFrame(Duration.millis((Double) newValue), e -> field.evolve());
+		Animation.Status status = timer.getStatus();
+		timer.stop();
+		timer.getKeyFrames().setAll(k);
+		if (status.equals(Animation.Status.RUNNING)) {
+			timer.play();
 		}
 	}
 
+	private void resetFieldButtonClick() {
+		field.setField(0, 0, new String[]{});
+	}
+
 	private void evolveButtonClick() {
-		current_field.evolve();
-		updateTileColors();
+		field.evolve();
 	}
 
 	private void loadGliderButtonClick() {
-		current_field.insertIntoField(1, 1, new String[]{
+		field.insertIntoField(1, 1, new String[]{
 				".O.",
 				"..O",
 				"OOO"
 		});
-		updateTileColors();
 	}
 
 	private void loadSpaceshipButtonClick() {
-		current_field.insertIntoField(6, 3, new String[]{
+		field.insertIntoField(6, 3, new String[]{
 				"O..O.",
 				"....O",
 				"O...O",
 				".OOOO"
 		});
-		updateTileColors();
+	}
+}
+
+class GuiCell extends Rectangle {
+	int verticalCoordinate;
+	int horizontalCoordinate;
+
+	GuiCell(int verticalCoordinate, int horizontalCoordinate, int size) {
+		super(size, size);
+		this.verticalCoordinate = verticalCoordinate;
+		this.horizontalCoordinate = horizontalCoordinate;
+	}
+}
+
+class GuiField extends Field {
+	private List<GuiCell> guiCells;
+	GridPane fieldGrid;
+
+	GuiField(int height, int width) {
+		super(height, width);
+
+		guiCells = new ArrayList<>();
+
+		fieldGrid = new GridPane();
+		fieldGrid.setHgap(1);
+		fieldGrid.setVgap(1);
+
+		for (int i = 0; i < height; i++) {
+			for (int j = 0; j < width; j++) {
+				GuiCell cell = new GuiCell(i, j, 20);
+				cell.setFill(Color.BLACK);
+				cell.setOnMousePressed(e -> toggleCell((GuiCell) e.getSource()));
+				guiCells.add(cell);
+				fieldGrid.add(cell, j, i);
+			}
+		}
+	}
+
+	private void toggleCell (GuiCell cell) {
+		setCell(cell, !getCell(cell));
+	}
+
+	private void update() {
+		for(GuiCell cell : guiCells) {
+			cell.setFill(getCell(cell.verticalCoordinate, cell.horizontalCoordinate) ? Color.RED : Color.BLACK);
+		}
+	}
+
+	@Override
+	void evolve() {
+		super.evolve();
+		update();
+	}
+
+	@Override
+	void setField(int verticalOffset, int horizontalOffset, String[] lines) {
+		super.setField(verticalOffset, horizontalOffset, lines);
+		update();
+	}
+
+	@Override
+	void insertIntoField(int verticalOffset, int horizontalOffset, String[] lines) {
+		super.insertIntoField(verticalOffset, horizontalOffset, lines);
+		update();
+	}
+
+	private boolean getCell(GuiCell cell) {
+		return super.getCell(cell.verticalCoordinate, cell.horizontalCoordinate);
+	}
+
+	private void setCell(GuiCell cell, boolean value) {
+		super.setCell(cell.verticalCoordinate, cell.horizontalCoordinate, value);
+		cell.setFill(value ? Color.RED : Color.BLACK);
 	}
 }
