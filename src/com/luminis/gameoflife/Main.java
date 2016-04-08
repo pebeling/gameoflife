@@ -8,8 +8,6 @@ import javafx.stage.*;
 import javafx.scene.*;
 import javafx.scene.layout.*;
 import javafx.scene.control.*;
-import javafx.scene.shape.*;
-import javafx.scene.paint.*;
 import javafx.geometry.*;
 import javafx.util.Duration;
 
@@ -58,7 +56,7 @@ public class Main extends Application {
 		Button stopEvolutionButton = new Button();
 		stopEvolutionButton.setText("Stop");
 		stopEvolutionButton.setMaxWidth(Double.MAX_VALUE);
-		stopEvolutionButton.setDisable(true);
+		//stopEvolutionButton.setDisable(true);
 
 		Slider evolutionSpeed = new Slider(5, 500, 50);
 		evolutionSpeed.setOrientation(Orientation.HORIZONTAL);
@@ -88,7 +86,6 @@ public class Main extends Application {
 					startEvolutionButton.setDisable(true);
 					stopEvolutionButton.setDisable(false);
 					timer.play();
-
 				});
 		stopEvolutionButton.setOnAction(
 				e -> {
@@ -132,61 +129,5 @@ public class Main extends Application {
 				"O...O",
 				".OOOO"
 		});
-	}
-}
-
-class GuiField extends Field {
-	GridPane fieldGrid;
-
-	GuiField(int height, int width) {
-		super(height, width);
-
-		fieldGrid = new GridPane();
-		fieldGrid.setHgap(1);
-		fieldGrid.setVgap(1);
-
-		for (int i = 0; i < height; i++) {
-			for (int j = 0; j < width; j++) {
-				Rectangle cell = new Rectangle(20, 20);
-				cell.setFill(Color.BLACK);
-				cell.setOnMousePressed(
-						e -> {
-							Rectangle source = ((Rectangle) e.getSource());
-							int verticalCoordinate = GridPane.getRowIndex(source);
-							int horizontalCoordinate = GridPane.getColumnIndex(source);
-							boolean cellState = super.getCell(verticalCoordinate, horizontalCoordinate);
-							super.setCell(verticalCoordinate, horizontalCoordinate, !cellState);
-							source.setFill( !cellState ? Color.RED : Color.BLACK);
-
-						});
-				fieldGrid.add(cell, j, i);
-			}
-		}
-	}
-
-	private void update() {
-		for(Node cell : fieldGrid.getChildren()) {
-			int verticalCoordinate = GridPane.getRowIndex(cell);
-			int horizontalCoordinate = GridPane.getColumnIndex(cell);
-			((Rectangle) cell).setFill(super.getCell(verticalCoordinate, horizontalCoordinate) ? Color.RED : Color.BLACK);
-		}
-	}
-
-	@Override
-	void evolve() {
-		super.evolve();
-		update();
-	}
-
-	@Override
-	void setField(int verticalOffset, int horizontalOffset, String[] lines) {
-		super.setField(verticalOffset, horizontalOffset, lines);
-		update();
-	}
-
-	@Override
-	void insertIntoField(int verticalOffset, int horizontalOffset, String[] lines) {
-		super.insertIntoField(verticalOffset, horizontalOffset, lines);
-		update();
 	}
 }
