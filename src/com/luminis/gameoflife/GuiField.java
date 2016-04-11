@@ -1,5 +1,6 @@
 package com.luminis.gameoflife;
 
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.scene.Node;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
@@ -8,10 +9,12 @@ import javafx.scene.shape.Rectangle;
 class GuiField {
 	private Field field;
 	GridPane fieldGrid;
-	int cellGuiSize = 20;
+	SimpleIntegerProperty guiCellSize = new SimpleIntegerProperty(20);
 
 	GuiField(int height, int width) {
 		field = new Field(height, width);
+
+		guiCellSize.addListener(e -> update());
 
 		fieldGrid = new GridPane();
 		fieldGrid.setHgap(1);
@@ -19,7 +22,7 @@ class GuiField {
 
 		for (int i = 0; i < height; i++) {
 			for (int j = 0; j < width; j++) {
-				Rectangle cell = new Rectangle(cellGuiSize, cellGuiSize);
+				Rectangle cell = new Rectangle(guiCellSize.getValue(), guiCellSize.getValue());
 				cell.setFill(Color.BLACK);
 				cell.setOnMousePressed(
 						e -> {
@@ -36,15 +39,15 @@ class GuiField {
 		}
 	}
 
-	void update() {
+	private void update() {
 		for(Node fieldChild : fieldGrid.getChildren()) {
 			int verticalCoordinate = GridPane.getRowIndex(fieldChild);
 			int horizontalCoordinate = GridPane.getColumnIndex(fieldChild);
 			Rectangle cell = ((Rectangle) fieldChild);
 			cell.setFill(field.getCell(verticalCoordinate, horizontalCoordinate) ? Color.RED : Color.BLACK);
 			cell.setFill(field.getCell(verticalCoordinate, horizontalCoordinate) ? Color.RED : Color.BLACK);
-			cell.setHeight(cellGuiSize);
-			cell.setWidth(cellGuiSize);
+			cell.setHeight(guiCellSize.getValue());
+			cell.setWidth(guiCellSize.getValue());
 		}
 	}
 

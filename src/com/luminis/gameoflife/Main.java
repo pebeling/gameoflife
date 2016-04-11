@@ -5,9 +5,7 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.*;
 import javafx.beans.binding.Bindings;
-import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.SimpleBooleanProperty;
-import javafx.beans.value.ObservableValue;
 import javafx.stage.*;
 import javafx.scene.*;
 import javafx.scene.layout.*;
@@ -28,9 +26,7 @@ public class Main extends Application {
 		KeyFrame frame = new KeyFrame(Duration.millis(50), e -> field.evolve());
 		Timeline timer = new Timeline(frame);
 		timer.setCycleCount(Timeline.INDEFINITE);
-		evolutionStarted.addListener((ObservableValue<? extends Boolean> value, Boolean oldValue, Boolean newValue) -> {
-			if(newValue) { timer.play(); } else { timer.stop(); }
-		});
+		evolutionStarted.addListener((value, oldValue, newValue) -> { if(newValue) timer.play(); else timer.stop(); });
 		evolutionStarted.set(false);
 
 		ScrollPane sPane = new ScrollPane(field.fieldGrid);
@@ -85,19 +81,13 @@ public class Main extends Application {
 		Label evolutionSpeedLabel = new Label("Speed: ");
 		evolutionSpeed.setOrientation(Orientation.HORIZONTAL);
 		evolutionSpeed.setPrefHeight(50);
-		evolutionSpeed.valueProperty().addListener(
-				(observable, oldValue, newValue) -> resetTimer(timer, newValue)
-		);
+		evolutionSpeed.setOnMouseReleased(e-> resetTimer(timer, evolutionSpeed.getValue()));
 
-		Slider fieldScale = new Slider(5, 50, 20);
+		Slider fieldScale = new Slider(20, 50, 20);
 		Label fieldScaleLabel = new Label("Scale: ");
 		fieldScale.setOrientation(Orientation.HORIZONTAL);
 		fieldScale.setPrefHeight(50);
-		fieldScale.valueProperty().addListener(
-				(observable, oldValue, newValue) -> {
-					field.cellGuiSize = newValue.intValue();
-					field.update();
-				});
+		field.guiCellSize.bind(fieldScale.valueProperty());
 
 		GridPane sliderPane = new GridPane();
 		sliderPane.add(evolutionSpeedLabel, 0, 0);
