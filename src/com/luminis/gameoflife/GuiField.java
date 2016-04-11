@@ -5,12 +5,13 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 
-class GuiField extends Field {
+class GuiField {
+	private Field field;
 	GridPane fieldGrid;
 	int cellGuiSize = 20;
 
 	GuiField(int height, int width) {
-		super(height, width);
+		field = new Field(height, width);
 
 		fieldGrid = new GridPane();
 		fieldGrid.setHgap(1);
@@ -25,8 +26,8 @@ class GuiField extends Field {
 							Rectangle source = ((Rectangle) e.getSource());
 							int verticalCoordinate = GridPane.getRowIndex(source);
 							int horizontalCoordinate = GridPane.getColumnIndex(source);
-							boolean cellState = super.getCell(verticalCoordinate, horizontalCoordinate);
-							super.setCell(verticalCoordinate, horizontalCoordinate, !cellState);
+							boolean cellState = field.getCell(verticalCoordinate, horizontalCoordinate);
+							field.setCell(verticalCoordinate, horizontalCoordinate, !cellState);
 							source.setFill( !cellState ? Color.RED : Color.BLACK);
 
 						});
@@ -40,28 +41,25 @@ class GuiField extends Field {
 			int verticalCoordinate = GridPane.getRowIndex(fieldChild);
 			int horizontalCoordinate = GridPane.getColumnIndex(fieldChild);
 			Rectangle cell = ((Rectangle) fieldChild);
-			cell.setFill(super.getCell(verticalCoordinate, horizontalCoordinate) ? Color.RED : Color.BLACK);
-			cell.setFill(super.getCell(verticalCoordinate, horizontalCoordinate) ? Color.RED : Color.BLACK);
+			cell.setFill(field.getCell(verticalCoordinate, horizontalCoordinate) ? Color.RED : Color.BLACK);
+			cell.setFill(field.getCell(verticalCoordinate, horizontalCoordinate) ? Color.RED : Color.BLACK);
 			cell.setHeight(cellGuiSize);
 			cell.setWidth(cellGuiSize);
 		}
 	}
 
-	@Override
 	void evolve() {
-		super.evolve();
+		field.evolve();
 		update();
 	}
 
-	@Override
 	void setField(int verticalOffset, int horizontalOffset, String[] lines) {
-		super.setField(verticalOffset, horizontalOffset, lines);
+		field.setField(verticalOffset, horizontalOffset, lines);
 		update();
 	}
 
-	@Override
 	void insertIntoField(int verticalOffset, int horizontalOffset, String[] lines) {
-		super.insertIntoField(verticalOffset, horizontalOffset, lines);
+		field.insertIntoField(verticalOffset, horizontalOffset, lines);
 		update();
 	}
 }
