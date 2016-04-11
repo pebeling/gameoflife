@@ -7,6 +7,7 @@ import javafx.scene.shape.Rectangle;
 
 class GuiField extends Field {
 	GridPane fieldGrid;
+	int cellGuiSize = 20;
 
 	GuiField(int height, int width) {
 		super(height, width);
@@ -17,7 +18,7 @@ class GuiField extends Field {
 
 		for (int i = 0; i < height; i++) {
 			for (int j = 0; j < width; j++) {
-				Rectangle cell = new Rectangle(20, 20);
+				Rectangle cell = new Rectangle(cellGuiSize, cellGuiSize);
 				cell.setFill(Color.BLACK);
 				cell.setOnMousePressed(
 						e -> {
@@ -34,11 +35,15 @@ class GuiField extends Field {
 		}
 	}
 
-	private void update() {
-		for(Node cell : fieldGrid.getChildren()) {
-			int verticalCoordinate = GridPane.getRowIndex(cell);
-			int horizontalCoordinate = GridPane.getColumnIndex(cell);
-			((Rectangle) cell).setFill(super.getCell(verticalCoordinate, horizontalCoordinate) ? Color.RED : Color.BLACK);
+	void update() {
+		for(Node fieldChild : fieldGrid.getChildren()) {
+			int verticalCoordinate = GridPane.getRowIndex(fieldChild);
+			int horizontalCoordinate = GridPane.getColumnIndex(fieldChild);
+			Rectangle cell = ((Rectangle) fieldChild);
+			cell.setFill(super.getCell(verticalCoordinate, horizontalCoordinate) ? Color.RED : Color.BLACK);
+			cell.setFill(super.getCell(verticalCoordinate, horizontalCoordinate) ? Color.RED : Color.BLACK);
+			cell.setHeight(cellGuiSize);
+			cell.setWidth(cellGuiSize);
 		}
 	}
 
