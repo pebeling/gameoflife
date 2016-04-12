@@ -1,6 +1,9 @@
 package com.luminis.gameoflife;
 
+import javafx.application.Platform;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleIntegerProperty;
+import javafx.concurrent.Task;
 import javafx.scene.Node;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
@@ -10,6 +13,9 @@ class GuiField {
 	private Field field;
 	GridPane fieldGrid;
 	SimpleIntegerProperty guiCellSize = new SimpleIntegerProperty(20);
+	SimpleBooleanProperty evolutionRunning = new SimpleBooleanProperty();
+
+	private boolean evolutionRequested = false;
 
 	GuiField(int height, int width) {
 		field = new Field(height, width);
@@ -26,13 +32,14 @@ class GuiField {
 				cell.setFill(Color.BLACK);
 				cell.setOnMousePressed(
 						e -> {
-							Rectangle source = ((Rectangle) e.getSource());
-							int verticalCoordinate = GridPane.getRowIndex(source);
-							int horizontalCoordinate = GridPane.getColumnIndex(source);
-							boolean cellState = field.getCell(verticalCoordinate, horizontalCoordinate);
-							field.setCell(verticalCoordinate, horizontalCoordinate, !cellState);
-							source.setFill( !cellState ? Color.RED : Color.BLACK);
-
+							if (evolutionRunning.not().getValue() && e.isSecondaryButtonDown()) {
+								Rectangle source = ((Rectangle) e.getSource());
+								int verticalCoordinate = GridPane.getRowIndex(source);
+								int horizontalCoordinate = GridPane.getColumnIndex(source);
+								boolean cellState = field.getCell(verticalCoordinate, horizontalCoordinate);
+								field.setCell(verticalCoordinate, horizontalCoordinate, !cellState);
+								source.setFill(!cellState ? Color.RED : Color.BLACK);
+							}
 						});
 				fieldGrid.add(cell, j, i);
 			}
@@ -52,8 +59,20 @@ class GuiField {
 	}
 
 	void evolve() {
-		field.evolve();
-		update();
+		if (!evolutionRequested) {
+			evolutionRequested = true;
+			Task task = new Task<Void>() {
+				@Override public Void call() {
+					field.evolve();
+					Platform.runLater(() -> {
+						update();
+						evolutionRequested = false;
+					});
+					return null;
+				}
+			};
+			new Thread(task).start();
+		} //else System.out.println("Request ignored!");
 	}
 
 	void setField(int verticalOffset, int horizontalOffset, String[] lines) {

@@ -1,5 +1,7 @@
 package com.luminis.gameoflife;
 
+import static java.lang.Thread.sleep;
+
 public class Field {
 	public static final boolean ALIVE = true;
 	public static final boolean DEAD = false;
@@ -55,11 +57,16 @@ public class Field {
 
 	void setCell( int cellVerticalCoordinate, int cellHorizontalCoordinate, boolean value ) {
 		cells[wrapCoordinate(cellVerticalCoordinate, height)][wrapCoordinate(cellHorizontalCoordinate, width)] = value;
+		try {
+			sleep(1);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
 	}
 
 	// Fills a field using an array of strings such as { ".O.","..O","OOO" }, where O correspond to live cells. All other characters will be interpreted as dead cells
 	// We silently clip strings longer than width and drop strings with index >= height. We pad the field with dead cells
-	void setField(int verticalOffset, int horizontalOffset, String[] lines ) {
+	synchronized void setField(int verticalOffset, int horizontalOffset, String[] lines ) {
 		for(int i = 0; i < height; i++) {
 			if (i < lines.length) {
 				for (int j = 0; j < width; j++) {
@@ -73,7 +80,7 @@ public class Field {
 		}
 	}
 
-	void insertIntoField(int verticalOffset, int horizontalOffset, String[] lines ) {
+	synchronized void insertIntoField(int verticalOffset, int horizontalOffset, String[] lines ) {
 		for(int i = 0; i < lines.length; i++) {
 			for (int j = 0; j < lines[i].length(); j++) {
 				setCell(i + verticalOffset, j + horizontalOffset, lines[i].charAt(j) == 'O' || cells[i + verticalOffset][j + horizontalOffset]);
@@ -101,7 +108,7 @@ public class Field {
 		return total;
 	}
 
-	void evolve() {
+	synchronized void evolve() {
 		Field evolvedField = new Field(height, width);
 		for(int i = 0; i < height; i++) {
 			for(int j = 0; j < width; j++) {

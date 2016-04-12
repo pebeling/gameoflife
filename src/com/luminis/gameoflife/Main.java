@@ -5,7 +5,6 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.*;
 import javafx.beans.binding.Bindings;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.stage.*;
 import javafx.scene.*;
 import javafx.scene.layout.*;
@@ -15,7 +14,6 @@ import javafx.util.Duration;
 
 public class Main extends Application {
 	private GuiField field = new GuiField(30,30);
-	private SimpleBooleanProperty evolutionStarted = new SimpleBooleanProperty();
 
 	public static void main(String[] args) {
 		launch(args);
@@ -26,8 +24,12 @@ public class Main extends Application {
 		KeyFrame frame = new KeyFrame(Duration.millis(50), e -> field.evolve());
 		Timeline timer = new Timeline(frame);
 		timer.setCycleCount(Timeline.INDEFINITE);
-		evolutionStarted.addListener((value, oldValue, newValue) -> { if(newValue) timer.play(); else timer.stop(); });
-		evolutionStarted.set(false);
+		field.evolutionRunning.addListener(
+				(value, oldValue, newValue) -> {
+					if (newValue) timer.play();
+					else timer.stop();
+				});
+		field.evolutionRunning.set(false);
 
 		ScrollPane sPane = new ScrollPane(field.fieldGrid);
 		sPane.setHbarPolicy(ScrollPane.ScrollBarPolicy.AS_NEEDED);
@@ -38,7 +40,7 @@ public class Main extends Application {
 		evolveButton.setText("Evolve");
 		evolveButton.setOnAction(e -> field.evolve());
 		evolveButton.setMaxWidth(Double.MAX_VALUE);
-		evolveButton.disableProperty().bind(evolutionStarted);
+		evolveButton.disableProperty().bind(field.evolutionRunning);
 
 		Button loadGliderButton = new Button();
 		loadGliderButton.setText("Add Glider");
@@ -67,40 +69,40 @@ public class Main extends Application {
 		Button startEvolutionButton = new Button();
 		startEvolutionButton.setText("Start");
 		startEvolutionButton.setMaxWidth(Double.MAX_VALUE);
-		startEvolutionButton.disableProperty().bind(evolutionStarted);
-		startEvolutionButton.setOnAction(e -> evolutionStarted.set(true));
+		startEvolutionButton.disableProperty().bind(field.evolutionRunning);
+		startEvolutionButton.setOnAction(e -> field.evolutionRunning.set(true));
 
 		Button stopEvolutionButton = new Button();
 		stopEvolutionButton.setText("Stop");
 		stopEvolutionButton.setMaxWidth(Double.MAX_VALUE);
 		stopEvolutionButton.setDisable(true);
-		stopEvolutionButton.disableProperty().bind(Bindings.not(evolutionStarted));
-		stopEvolutionButton.setOnAction(e -> evolutionStarted.set(false));
+		stopEvolutionButton.disableProperty().bind(Bindings.not(field.evolutionRunning));
+		stopEvolutionButton.setOnAction(e -> field.evolutionRunning.set(false));
 
-		Slider evolutionSpeed = new Slider(5, 500, 50);
+		Slider evolutionSpeed = new Slider(5, 4000, 50);
 		Label evolutionSpeedLabel = new Label("Speed: ");
 		evolutionSpeed.setOrientation(Orientation.HORIZONTAL);
-		evolutionSpeed.setPrefHeight(50);
+		evolutionSpeed.setMinHeight(50);
 		evolutionSpeed.setOnMouseReleased(e-> resetTimer(timer, evolutionSpeed.getValue()));
 
 		Slider fieldScale = new Slider(20, 50, 20);
 		Label fieldScaleLabel = new Label("Scale: ");
 		fieldScale.setOrientation(Orientation.HORIZONTAL);
-		fieldScale.setPrefHeight(50);
+		fieldScale.setMinHeight(50);
 		field.guiCellSize.bind(fieldScale.valueProperty());
 
-		GridPane sliderPane = new GridPane();
-		sliderPane.add(evolutionSpeedLabel, 0, 0);
-		sliderPane.add(evolutionSpeed, 1, 0);
-		sliderPane.add(fieldScaleLabel, 0, 1);
-		sliderPane.add(fieldScale, 1, 1);
+		GridPane gridPane = new GridPane();
+		gridPane.add(evolutionSpeedLabel, 0, 0);
+		gridPane.add(evolutionSpeed, 1, 0);
+		gridPane.add(fieldScaleLabel, 0, 1);
+		gridPane.add(fieldScale, 1, 1);
 		ColumnConstraints column1 = new ColumnConstraints();
 		ColumnConstraints column2 = new ColumnConstraints();
 		column1.setHgrow(Priority.NEVER);
 		column2.setHgrow(Priority.ALWAYS);
-		sliderPane.getColumnConstraints().addAll(column1, column2);
+		gridPane.getColumnConstraints().addAll(column1, column2);
 
-		VBox leftPanel = new VBox(sPane, sliderPane);
+		VBox leftPanel = new VBox(sPane, gridPane);
 		VBox rightPanel = new VBox(loadGliderButton, loadSpaceshipButton, evolveButton, startEvolutionButton, stopEvolutionButton, resetFieldButton);
 		rightPanel.setMinWidth(120);
 
