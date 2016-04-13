@@ -57,11 +57,11 @@ public class Field {
 
 	void setCell( int cellVerticalCoordinate, int cellHorizontalCoordinate, boolean value ) {
 		cells[wrapCoordinate(cellVerticalCoordinate, height)][wrapCoordinate(cellHorizontalCoordinate, width)] = value;
-		try {
-			sleep(1);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+//		try {
+//			sleep(1);
+//		} catch (InterruptedException e) {
+//			e.printStackTrace();
+//		}
 	}
 
 	// Fills a field using an array of strings such as { ".O.","..O","OOO" }, where O correspond to live cells. All other characters will be interpreted as dead cells
